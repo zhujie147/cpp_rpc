@@ -4,10 +4,13 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-namespace rocket
-{
-    pid_t getPid();
-    pid_t getThreadId();
+namespace rocket {
+
+pid_t getPid();
+
+pid_t getThreadId();
+
+int64_t getNowMs();
 
 }
 
