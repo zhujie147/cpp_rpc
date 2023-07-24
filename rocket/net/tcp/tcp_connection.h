@@ -11,7 +11,10 @@
 #include "rocket/common/log.h"
 #include "rocket/net/fd_event_group.h"
 #include "rocket/net/io_thread.h"
-#include "rocket/net/abstract_coder.h"
+#include "rocket/net/coder/abstract_coder.h"
+#include "rocket/net/coder/tinypb_coder.h"
+#include "rocket/net/coder/tinypb_protocol.h"
+
 namespace rocket
 {
     enum TcpState

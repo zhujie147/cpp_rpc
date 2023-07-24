@@ -14,8 +14,8 @@
 #include "rocket/net/tcp/tcp_client.h"
 #include "rocket/net/tcp/net_addr.h"
 #include "rocket/net/tcp/tcp_server.h"
-#include "rocket/net/string_coder.h"
-#include "rocket/net/abstract_protocol.h"
+#include "rocket/net/coder/string_coder.h"
+#include "rocket/net/coder/abstract_protocol.h"
 void tests_connect()
 {
     int fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -48,21 +48,17 @@ void test_tcp_client()
     rocket::TcpClient client(addr);
     client.connect([addr, &client]()
                    {
-                       DEBUGLOG("connect to [%s]", addr->toString().c_str());
-                       std::shared_ptr<rocket::StringProtocol> message = std::make_shared<rocket::StringProtocol>();
-                       message->info = "Hello rocket";
-                       message->setReqId("123456");
-                       client.writeMessage(message, [](rocket::AbstractProtocol::s_ptr msg_ptr)
-                                           { DEBUGLOG("send message success"); });
-                       client.readMessage("123456", [](rocket::AbstractProtocol::s_ptr msg_ptr)
-                                           { std::shared_ptr<rocket::StringProtocol> message = std::dynamic_pointer_cast<rocket::StringProtocol>(msg_ptr);
-                                                DEBUGLOG("get response %s, response [%s]",message->getReqId().c_str(),message->info.c_str());
-                                            });
-                                    std::shared_ptr<rocket::StringProtocol> message2=std::make_shared<rocket::StringProtocol>();;
-                                    message2->info= "hello two"; 
-                                    message2->setReqId("1235");      
-                    client.writeMessage(message2, [](rocket::AbstractProtocol::s_ptr msg_ptr)
-                { DEBUGLOG("send message 2222 success"); }); });
+DEBUGLOG("connect to [%s]", addr->toString().c_str());
+std::shared_ptr<rocket::TinyPBProtocol> message = std::make_shared<rocket::TinyPBProtocol>();
+message->m_msg_id="123456789";
+message->m_pb_data="test pb data";
+client.writeMessage(message, [](rocket::AbstractProtocol::s_ptr msg_ptr)
+                    { DEBUGLOG("send message success"); });
+client.readMessage("123456789", [](rocket::AbstractProtocol::s_ptr msg_ptr)
+                    { std::shared_ptr<rocket::TinyPBProtocol> message = std::dynamic_pointer_cast<rocket::TinyPBProtocol>(msg_ptr);
+                        DEBUGLOG("get response %s, response [%s]",message->m_msg_id.c_str(),message->m_pb_data.c_str());
+                    });
+            ; });
 }
 
 int main()

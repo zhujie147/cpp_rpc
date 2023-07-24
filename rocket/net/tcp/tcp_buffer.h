@@ -2,7 +2,7 @@
 #define ROCKET_NET_TCP_TCP_BUFFER_H
 
 #include <vector>
-
+#include <memory>
 namespace rocket {
 
 class TcpBuffer {
