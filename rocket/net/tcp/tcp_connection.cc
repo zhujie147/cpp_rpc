@@ -2,8 +2,8 @@
 #include "rocket/net/coder/string_coder.h"
 namespace rocket
 {
-    TcpConnection::TcpConnection(EventLoop *event_loop, int fd, int buffer_size, NetAddr::s_ptr peer_addr, TcpConnectionType type /* = TcpConnectionByServer */)
-        : m_event_loop(event_loop), m_peer_addr(peer_addr), m_state(NotConnected), m_fd(fd), m_connection_type(type)
+    TcpConnection::TcpConnection(EventLoop *event_loop, int fd, int buffer_size, NetAddr::s_ptr peer_addr,NetAddr::s_ptr local_addr, TcpConnectionType type /* = TcpConnectionByServer */)
+        : m_event_loop(event_loop), m_peer_addr(peer_addr),m_local_addr(local_addr), m_state(NotConnected), m_fd(fd), m_connection_type(type)
     {
         m_in_buffer = std::make_shared<TcpBuffer>(buffer_size);
         m_out_buffer = std::make_shared<TcpBuffer>(buffer_size);
@@ -13,6 +13,7 @@ namespace rocket
         if (m_connection_type == TcpConnectionByServer)
         {
             listenRead();
+            m_dispatcher = std::make_shared<RpcDispatcher>();
         }
 
         m_coder = new TinyPBCoder();
@@ -94,13 +95,14 @@ namespace rocket
             for (size_t i = 0; i < result.size(); i++)
             {
                 INFOLOG("success get request [%s] from client[%s]", result[i]->m_msg_id.c_str(), m_peer_addr->toString().c_str());
-                std::shared_ptr<TinyPBProtocol> message=std::make_shared<TinyPBProtocol>();
-                message->m_pb_data="hello , this is rocket rpc test data";
-                message->m_msg_id=result[i]->m_msg_id;
+                std::shared_ptr<TinyPBProtocol> message = std::make_shared<TinyPBProtocol>();
+                // message->m_pb_data="hello , this is rocket rpc test data";
+                // message->m_msg_id=result[i]->m_msg_id;
+                m_dispatcher->dispatcher(result[i], message,this);
                 replay_messages.emplace_back(message);
             }
             // m_out_buffer->writeToBuffer(msg.c_str(), msg.size());
-            m_coder->encode(replay_messages,m_out_buffer);
+            m_coder->encode(replay_messages, m_out_buffer);
             listenWrite();
         }
         else
@@ -232,5 +234,14 @@ namespace rocket
     void TcpConnection::pushReadMessage(const std::string &req_id, std::function<void(AbstractProtocol::s_ptr)> done)
     {
         m_read_dones.insert(std::make_pair(req_id, done));
+    }
+
+    NetAddr::s_ptr TcpConnection::getLocalAddr()
+    {
+        return m_local_addr;
+    }
+    NetAddr::s_ptr TcpConnection::getPeerAddr()
+    {
+        return m_peer_addr;
     }
 }
