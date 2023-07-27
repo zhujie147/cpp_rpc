@@ -65,7 +65,8 @@ class EventLoop {
 
   Timer* m_timer {NULL};
 
-  bool m_is_looping{false};
+  bool m_is_looping {false};
+
 };
 
 }

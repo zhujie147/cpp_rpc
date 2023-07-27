@@ -14,7 +14,7 @@ class TcpAcceptor {
 
   ~TcpAcceptor();
 
-  std::pair<int , NetAddr::s_ptr> accept();
+  std::pair<int, NetAddr::s_ptr> accept();
 
   int getListenFd();
 

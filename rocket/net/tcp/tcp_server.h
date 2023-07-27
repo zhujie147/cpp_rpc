@@ -8,12 +8,12 @@
 #include "rocket/net/eventloop.h"
 #include "rocket/net/io_thread_group.h"
 
-
 namespace rocket {
 
 class TcpServer {
  public:
   TcpServer(NetAddr::s_ptr local_addr);
+
   ~TcpServer();
 
   void start();
